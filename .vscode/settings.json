@@ -2,5 +2,7 @@
   "eslint.validate": [
     "json"
   ],
-  "cSpell.language": "en,es-ES"
+  "cSpell.language": "en,es-ES",
+  "prettier.enable": true,
+  "editor.formatOnSave": true
 }
