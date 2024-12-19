@@ -1,7 +1,16 @@
+import {
+  animate,
+  keyframes,
+  query,
+  stagger,
+  state,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
 import { Component } from '@angular/core';
 
 @Component({
-  imports: [],
   selector: 'app-root',
   styles: `
     section {
@@ -18,7 +27,7 @@ import { Component } from '@angular/core';
   `,
   template: `
     <div class="mx-20 my-40 flex gap-5">
-      <section>
+      <section @flyIn>
         <div>
           <h3>2008</h3>
           <p>
@@ -50,7 +59,7 @@ import { Component } from '@angular/core';
         </div>
       </section>
 
-      <section>
+      <section @stagger>
         <div class="list-item">
           <span>Name:</span>
           <span>Samuel</span>
@@ -83,5 +92,35 @@ import { Component } from '@angular/core';
       </section>
     </div>
   `,
+  imports: [],
+  animations: [
+    trigger('flyIn', [
+      state('in', style({ transform: 'translateX(0)', opacity: 1 })),
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateX(-100%)' }),
+        animate(100),
+      ]),
+    ]),
+    trigger('stagger', [
+      transition(':enter', [
+        query('.list-item', [
+          style({ opacity: 0, transform: 'translateX(-100%)' }),
+          stagger(100, [
+            animate(
+              '500ms cubic-bezier(0.35, 0, 0.25, 1)',
+              keyframes([
+                style({
+                  opacity: 0,
+                  transform: 'translateX(-10%)',
+                  offset: 0.8,
+                }),
+                style({ opacity: 1, transform: 'translateX(0)', offset: 1.0 }),
+              ]),
+            ),
+          ]),
+        ]),
+      ]),
+    ]),
+  ],
 })
 export class AppComponent {}
