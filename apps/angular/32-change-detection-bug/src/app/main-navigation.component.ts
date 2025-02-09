@@ -1,5 +1,5 @@
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
-import { Component, Input, inject } from '@angular/core';
+import { AsyncPipe, NgFor } from '@angular/common';
+import { Component, inject, Input, Pipe, PipeTransform } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { FakeServiceService } from './fake.service';
 
@@ -36,18 +36,27 @@ export class NavigationComponent {
   @Input() menus!: MenuItem[];
 }
 
-@Component({
-  imports: [NavigationComponent, NgIf, AsyncPipe],
-  template: `
-    <ng-container *ngIf="info$ | async as info">
-      <ng-container *ngIf="info !== null; else noInfo">
-        <app-nav [menus]="getMenu(info)" />
-      </ng-container>
-    </ng-container>
+// other way would be to use trackby
+@Pipe({ name: 'memo' })
+export class MemoPipe implements PipeTransform {
+  transform(prop: string): MenuItem[] {
+    return [
+      { path: '/foo', name: `Foo ${prop}` },
+      { path: '/bar', name: `Bar ${prop}` },
+    ];
+  }
+}
 
-    <ng-template #noInfo>
-      <app-nav [menus]="getMenu('')" />
-    </ng-template>
+@Component({
+  imports: [NavigationComponent, AsyncPipe, MemoPipe],
+  template: `
+    @if (info$ | async; as info) {
+      @if (info !== null) {
+        <app-nav [menus]="info | memo"></app-nav>
+      } @else {
+        <app-nav [menus]="'' | memo"></app-nav>
+      }
+    }
   `,
   host: {},
 })
@@ -56,10 +65,10 @@ export class MainNavigationComponent {
 
   readonly info$ = this.fakeBackend.getInfoFromBackend();
 
-  getMenu(prop: string) {
-    return [
-      { path: '/foo', name: `Foo ${prop}` },
-      { path: '/bar', name: `Bar ${prop}` },
-    ];
-  }
+  // getMenu(prop: string) {
+  //   return [
+  //     { path: '/foo', name: `Foo ${prop}` },
+  //     { path: '/bar', name: `Bar ${prop}` },
+  //   ];
+  // }
 }
